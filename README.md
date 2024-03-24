@@ -1,3 +1,3 @@
-# Jatte
+# Zogazog
 
-This project is the base starter for a tutorial from Code With Stein
+This is a django channels chat project developing by #jahid Hassan
