@@ -29,7 +29,7 @@ class Room(models.Model):
 
     uuid = models.CharField(_("UUID"), max_length=255)
     client = models.CharField(_("Client"), max_length=255)
-    agent = models.ForeignKey(User, related_name='rooms', on_delete=models.DO_NOTHING)
+    agent = models.ForeignKey(User, related_name='rooms',blank=True,null=True, on_delete=models.SET_NULL)
     messages = models.ManyToManyField(Message, blank=True)
     url = models.CharField(_("URL"), max_length=255,blank=True,null=True)
     status = models.CharField(_("STATUS"), max_length=20,choices=CHOICES_STATUS,default=WAITING)
