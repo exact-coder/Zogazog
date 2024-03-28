@@ -3,6 +3,8 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from chat.models import Room
+from django.contrib.auth.decorators import login_required
+from chat.models import User
 
 # Create your views here.
 
@@ -14,3 +16,10 @@ def create_room(request,uuid):
     Room.objects.create(uuid=uuid,client=name,url=url)
 
     return JsonResponse({'message':'room created'})
+
+@login_required
+def admin(request):
+    rooms = Room.objects.all()
+    users = User.objects.filter(is_staff=True)
+
+    return render(request, 'chat/admin.html', {'rooms': rooms, 'users':users})
