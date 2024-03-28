@@ -23,3 +23,15 @@ def admin(request):
     users = User.objects.filter(is_staff=True)
 
     return render(request, 'chat/admin.html', {'rooms': rooms, 'users':users})
+
+@login_required
+def room(request,uuid):
+    room = Room.objects.get(uuid=uuid)
+
+    if room.status == Room.WAITING:
+        room.status = Room.ACTIVE
+        room.agent = request.user
+        room.save()
+
+    return render(request, 'chat/room.html', {'room': room})
+
