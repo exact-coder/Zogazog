@@ -14,7 +14,7 @@
                 {% for user in users %}
                     <div class="grid grid-cols-4 gap-4 py-2 {% cycle 'bg-rose-100' 'bg-emerald-100' %}">
                         <p class="px-2">
-                            {{user.name}}
+                            <a class="underline" href="{% url "chat:user_detail" user.pk %}">{{user.name}}</a>
                         </p>
 
                         <p class="px-2">{{user.email}}</p>

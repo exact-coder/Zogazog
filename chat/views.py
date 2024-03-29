@@ -39,6 +39,14 @@ def room(request,uuid):
     return render(request, 'chat/room.html', {'room': room})
 
 @login_required
+def user_detail(request,uuid):
+    user = User.objects.get(pk=uuid)
+    rooms = user.rooms.all() # type: ignore
+
+    return render(request, 'chat/user_detail.html',{'user':user,'rooms':rooms})
+
+
+@login_required
 def add_user(request):
     if request.user.has_perm('user.add_user'):
         if request.method == 'POST':
