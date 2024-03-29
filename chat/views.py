@@ -1,10 +1,13 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from chat.models import Room
 from django.contrib.auth.decorators import login_required
 from chat.models import User
+from account.forms import AddUserForm,EditUserForm
+from django.contrib import messages
+from django.contrib.auth.models import Group
 
 # Create your views here.
 
@@ -34,4 +37,36 @@ def room(request,uuid):
         room.save()
 
     return render(request, 'chat/room.html', {'room': room})
+
+@login_required
+def add_user(request):
+    if request.user.has_perm('user.add_user'):
+        if request.method == 'POST':
+            form = AddUserForm(request.POST)
+
+            if form.is_valid():
+                user = form.save(commit=False)
+                user.is_staff = True
+                user.set_password(request.POST.get('password'))
+                user.save()
+
+                if user.role == User.AGENT:
+                    group = Group.objects.get(name="Agents")
+                    group.user_set.add(user) # type: ignore
+
+                if user.role == User.MANAGER:
+                    group = Group.objects.get(name="Managers")
+                    group.user_set.add(user) # type: ignore
+                
+                messages.error(request, "The user was added!")
+                return redirect('chat:chat-admin')
+        else:
+            form = AddUserForm()
+        
+        return render(request, 'chat/add_user.html', {'form': form})
+    else:
+        messages.error(request, "You don\'t have access to add users!")
+        return redirect('chat:chat-admin')
+
+
 
