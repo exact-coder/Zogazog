@@ -27,6 +27,10 @@ const chatSubmitElement = document.querySelector("#chat_message_submit");
  * Functions
  */
 
+function scrollToBottom(){
+    chatLogElement.scrollTop = chatLogElement.scrollHeight;
+}
+
 function getCookie(name) {
     var cookieValue = null;
 
@@ -85,7 +89,8 @@ function onChatMessage(data){
             </div>
             `
         }
-    } 
+    }
+    scrollToBottom()
 }
 
 async function joinChatRoom(){
@@ -117,6 +122,7 @@ async function joinChatRoom(){
     
     chatSocket.onopen = function(e){
         console.log('onOpen - chat socket was opened');
+        scrollToBottom()
     }
 
     chatSocket.onclose = function(e){
@@ -152,4 +158,9 @@ chatSubmitElement.onclick = function(e) {
     sendMessage()
 
     return false;
+}
+chatInputElement.onkeyup = function(e){
+    if(e.keyCode == 13){
+        sendMessage()
+    }
 }
