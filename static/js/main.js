@@ -98,24 +98,26 @@ function onChatMessage(data){
     }else if(data.type == 'users_update'){
         chatLogElement.innerHTML += '<p class="mt-2">The admin/agent has joined the chat!</p>'
     }else if(data.type == 'writing_active'){
-        let tmpInfo = document.querySelector('.tmp-info')
+        if (data.agent) {
+            let tmpInfo = document.querySelector('.tmp-info')
 
-        if(tmpInfo) {
-            tmpInfo.remove();
-        }
-
-        chatLogElement.innerHTML += `
-        <div class="tmp-info flex w-full mt-2 space-x-3 max-w-md">
-            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300 text-center pt-2">${data.initials}</div>
-            <div>
-                <div style="background-color:rgb(209 213 219);" class="bg-gray-300 p-3 rounded-l-lg rounded-br-lg">
-                    <p class="text-sm">The agent/admin is writing a message...</p>
+            if(tmpInfo) {
+                tmpInfo.remove();
+            }
+            chatLogElement.innerHTML += `
+            <div class="tmp-info flex w-full mt-2 space-x-3 max-w-md">
+                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300 text-center pt-2">${data.initials}</div>
+                <div>
+                    <div style="background-color:rgb(209 213 219);" class="bg-gray-300 p-3 rounded-l-lg rounded-br-lg">
+                        <p class="text-sm">The agent/admin is writing a message...</p>
+                    </div>
+                    
                 </div>
-                
+                    
             </div>
-                
-        </div>
-        `
+            `
+        }
+        
     }
     scrollToBottom()
 }
@@ -186,8 +188,17 @@ chatSubmitElement.onclick = function(e) {
 
     return false;
 }
+
 chatInputElement.onkeyup = function(e){
     if(e.keyCode == 13){
         sendMessage()
     }
+}
+
+chatInputElement.onfocus = function(e){
+    chatSocket.send(JSON.stringify({
+        'type': 'update',
+        'message': 'writing_active',
+        'name': chatName,
+    }))
 }
