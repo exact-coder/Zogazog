@@ -39,6 +39,18 @@ def room(request,uuid):
     return render(request, 'chat/room.html', {'room': room})
 
 @login_required
+def delete_room(request,uuid):
+    if request.user.has_perm('room.delete_room'):
+        room = Room.objects.get(uuid=uuid)
+        room.delete()
+        messages.success(request, "The room was deleted!")
+        return redirect('chat:chat-admin')
+    else:
+        messages.error(request, "You don\'t have access to delete room!")
+        return redirect('chat:chat-admin')
+
+
+@login_required
 def user_detail(request,uuid):
     user = User.objects.get(pk=uuid)
     rooms = user.rooms.all() # type: ignore
@@ -57,7 +69,7 @@ def edit_user(request,uuid):
 
             if form.is_valid():
                 form.save()
-                messages.error(request, "The changes was saved!")
+                messages.success(request, "The changes was saved!")
                 return redirect('chat:chat-admin')
 
         return render(request, 'chat/edit_user.html', {'user':user,'form': form})
@@ -85,7 +97,7 @@ def add_user(request):
                     group = Group.objects.get(name="Managers")
                     group.user_set.add(user) # type: ignore
                 
-                messages.error(request, "The user was added!")
+                messages.success(request, "The user was added!")
                 return redirect('chat:chat-admin')
         else:
             form = AddUserForm()
