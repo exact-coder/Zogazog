@@ -19,6 +19,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.room_group_name, self.channel_name) # type: ignore
         await self.accept()
 
+        # Inform user
+        if self.user.is_staff:
+            await self.channel_layer.group_send( # type: ignore
+                self.room_group_name,
+                {
+                    'type':'users_update'
+                }
+            )
+
     async def disconnect(self, close_code):
         # Leave room
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name) # type: ignore
@@ -46,6 +55,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'created_at': timesince(new_message.created_at),
                 }
             )
+        elif type == 'update':
+            # send update to the room
+            await self.channel_layer.group_send( # type: ignore
+                self.room_group_name,{
+                    'type': 'writing_active',
+                    'message': message,
+                    'name': name,
+                    'agent': agent,
+                    'initials': initials(name),
+                }
+            )
+    
+
     async def chat_message(self,event):
         # Send message to Websocket (frontend)
         await self.send(text_data=json.dumps({
@@ -55,6 +77,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'agent': event['agent'],
             'initials': event['initials'],
             'created_at': event['created_at'],
+        }))
+
+    
+    async def writing_active(self,event):
+        # Send writing is active to room
+        await self.send(text_data=json.dumps({
+            'type': event['type'],
+            'message': event['message'],
+            'name': event['name'],
+            'agent': event['agent'],
+            'initials': event['initials'],
+        }))
+    
+    async def users_update(self,event):
+        # send information to the web socket (frontend)
+        await self.send(text_data=json.dumps({
+            'type': 'users_update'
         }))
     
     @sync_to_async
